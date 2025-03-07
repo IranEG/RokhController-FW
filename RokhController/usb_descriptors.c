@@ -191,7 +191,7 @@ char const *string_desc_arr[] =
 {
   (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
   "Rokh Enterprises LLC.",       // 1: Manufacturer
-  "Rokh Gamepad V1",          // 2: Product
+  "Rokh Controller 1.0",         // 2: Product
   NULL,                          // 3: Serials will use unique ID if possible
 };
 
