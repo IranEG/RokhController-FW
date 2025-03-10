@@ -28,38 +28,38 @@ set(PICO_BOARD pico2_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(RokhGamepad C CXX ASM)
+project(RokhController C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(RokhGamepad)
+add_executable(RokhController)
 
-target_sources(RokhGamepad PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}/RokhGamepad.c
+target_sources(RokhController PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/RokhController.c
         ${CMAKE_CURRENT_LIST_DIR}/usb_descriptors.c
         )
 
-pico_set_program_name(RokhGamepad "RokhGamepad")
-pico_set_program_version(RokhGamepad "0.1")
+pico_set_program_name(RokhController "RokhController")
+pico_set_program_version(RokhController "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(RokhGamepad 1)
-pico_enable_stdio_usb(RokhGamepad 0)
+pico_enable_stdio_uart(RokhController 1)
+pico_enable_stdio_usb(RokhController 0)
 
 # Add the standard library to the build
-target_link_libraries(RokhGamepad
+target_link_libraries(RokhController
         pico_stdlib)
 
 # Add the standard include files to the build
-target_include_directories(RokhGamepad PRIVATE
+target_include_directories(RokhController PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Add any user requested libraries
-target_link_libraries(RokhGamepad
+target_link_libraries(RokhController
         hardware_spi
         tinyusb_device
         tinyusb_board
@@ -67,5 +67,5 @@ target_link_libraries(RokhGamepad
         pico_unique_id
         )
 
-pico_add_extra_outputs(RokhGamepad)
+pico_add_extra_outputs(RokhController)
 
