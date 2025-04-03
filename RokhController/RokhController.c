@@ -8,11 +8,13 @@
 #include "usb_descriptors.h"
 #include "pico/cyw43_arch.h"
 
-#define SPI_PORT    spi0
-#define SPI_SCK_PIN 18
-#define SPI_RX_PIN  16
-#define SPI_TX_PIN  19
-#define SPI_CS_PIN  17
+#include "pico/bootrom.h"
+
+#define SPI_PORT    spi1
+#define SPI_SCK_PIN 10
+#define SPI_RX_PIN  8
+#define SPI_TX_PIN  11
+#define SPI_CS_PIN  9
 
 #define SPI_SPEED 1000000
 #define MCP3204_CH_LX 0
@@ -21,7 +23,7 @@
 #define MCP3204_CH_RY 3
 
 struct AnalogStick {
-    uint X;
+  uint X;
     uint Y;
 };
 
@@ -288,33 +290,33 @@ int16_t mcp3204_read(int channel)
 
 int main()
 { 
-    board_init();
-    printf("\e[1;1H\e[2J"); //Blank Serial Screen
-    print_i("Board Initialized.\n");
+  board_init();
+  printf("\e[1;1H\e[2J"); //Blank Serial Screen
+  print_i("Board Initialized.\n");
 
-    mcp3204_init();
-    print_i("mcp3204 Initialized.\n");
+  mcp3204_init();
+  print_i("mcp3204 Initialized.\n");
 
-    // Initialize the Wi-Fi chip
-    if (cyw43_arch_init()) {
-        print_i("Wi-Fi init failed\n");
-        return -1;
-    }
-    print_i("CYW43 Initialized.\n");
+  // Initialize the Wi-Fi chip
+  if (cyw43_arch_init()) {
+      print_i("Wi-Fi init failed\n");
+      return -1;
+  }
+  print_i("CYW43 Initialized.\n");
 
-    tud_init(BOARD_TUD_RHPORT);
+  tud_init(BOARD_TUD_RHPORT);
 
-    if (board_init_after_tusb) {
-        board_init_after_tusb();
-    }
+  if (board_init_after_tusb) {
+      board_init_after_tusb();
+  }
 
-    print_i("tud_init\n");
-    
-    while (true) {
-      report.x = mcp3204_read(MCP3204_CH_LX);
-      report.y = mcp3204_read(MCP3204_CH_LY);
-      tud_task();
-      led_blinking_task();
-      hid_task();
-    }
+  print_i("tud_init\n");
+  
+  while (true) {
+    report.x = mcp3204_read(MCP3204_CH_LX);
+    report.y = mcp3204_read(MCP3204_CH_LY);
+    tud_task();
+    led_blinking_task();
+    hid_task();
+  }
 }
