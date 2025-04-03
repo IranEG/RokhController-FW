@@ -78,9 +78,9 @@ typedef struct __attribute__((__packed__))
     uint16_t  x;         ///< Delta x  movement of left analog-stick
     uint16_t  y;         ///< Delta y  movement of left analog-stick
     uint16_t  z;         ///< Delta z  movement of right analog-joystick
-    uint16_t  rz;        ///< Delta Rz movement of right analog-joystick
     uint16_t  rx;        ///< Delta Rx movement of analog left trigger
     uint16_t  ry;        ///< Delta Ry movement of analog right trigger
+    uint16_t  rz;        ///< Delta Rz movement of right analog-joystick
     uint8_t hat;       ///< Buttons mask for currently pressed buttons in the DPad/hat
     uint32_t buttons;  ///< Buttons mask for currently pressed buttons
 } rokh_hid_gamepad_report_t;

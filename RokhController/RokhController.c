@@ -17,14 +17,43 @@
 #define SPI_CS_PIN  9
 
 #define SPI_SPEED 1000000
-#define MCP3204_CH_LX 0
-#define MCP3204_CH_LY 1
-#define MCP3204_CH_RX 2
-#define MCP3204_CH_RY 3
+#define MCP3204_CH_LY 0
+#define MCP3204_CH_LX 1
+#define MCP3204_CH_RY 2
+#define MCP3204_CH_RX 3
+
+//FACE BUTTONS
+#define BUTTON_Y 12
+#define BUTTON_X 13
+#define BUTTON_B 14
+#define BUTTON_A 15
+
+//D-PAD
+#define BUTTON_D 17
+#define BUTTON_R 18
+#define BUTTON_L 19
+#define BUTTON_U 20
+
+//BUMPER BUTTONS
+
+#define BUTTON_L1 28
+#define BUTTON_L2 27
+#define BUTTON_R1 2
+#define BUTTON_R2 3
+
+//STICK BUTTONS
+
+#define BUTTON_L3 22
+#define BUTTON_R3 5
+
+//MENU BUTTONS
+#define BUTTON_START 4
+#define BUTTON_HOME 16
+#define BUTTON_SELECT 26
 
 struct AnalogStick {
   uint X;
-    uint Y;
+  uint Y;
 };
 
 rokh_hid_gamepad_report_t report = {
@@ -107,36 +136,18 @@ void tud_resume_cb(void)
 // USB HID
 //--------------------------------------------------------------------+
 
-static void send_hid_report(uint8_t report_id, uint32_t btn)
+static void send_hid_report(uint8_t report_id)
 {
   // skip if hid is not ready yet
-  if ( !tud_hid_ready() )
+  if (!tud_hid_ready()) {
     return;
-
-  // use to avoid send multiple consecutive zero report for keyboard
-  static bool has_gamepad_key = false;
-
-  if ( btn ) {
-    report.hat = GAMEPAD_HAT_UP;
-    report.buttons = GAMEPAD_BUTTON_A;
-    report.rx = 0xfff;
-    report.ry= 0xfff;
-
-    printf("Size of hid_gamepad_report_t %d\n", sizeof(rokh_hid_gamepad_report_t));
-    printf("Size of report %d\n", sizeof(report));
-
-    tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(rokh_hid_gamepad_report_t));
-    has_gamepad_key = true;
-
-  } else {
-    report.hat = GAMEPAD_HAT_CENTERED;
-    report.buttons = 0;
-      
-    if (has_gamepad_key)
-      tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(rokh_hid_gamepad_report_t));
-      
-    has_gamepad_key = false;
   }
+
+  print("Size of hid_gamepad_report_t %d\n", sizeof(rokh_hid_gamepad_report_t));
+  printf("Size of report %d\n", sizeof(report));
+
+  tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(rokh_hid_gamepad_report_t));
+
 }
 
 // Every 10ms, we will sent 1 report for each HID profile (keyboard, mouse etc ..)
@@ -152,17 +163,15 @@ void hid_task(void)
   
     start_ms += interval_ms;
 
-  uint32_t btn = board_button_read();
-
   // Remote wakeup
-  if (tud_suspended() && btn)
+  if (tud_suspended())
   {
     // Wake up host if we are in suspend mode
     // and REMOTE_WAKEUP feature is enabled by host
     tud_remote_wakeup();
   } else {
     // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
-    send_hid_report(REPORT_ID_GAMEPAD, btn);
+    send_hid_report(REPORT_ID_GAMEPAD);
   }
 }
 
@@ -222,6 +231,8 @@ uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_t
 void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
 {
   (void) instance;
+
+  printf("Set report was called\n");
 
   /*if (report_type == HID_REPORT_TYPE_OUTPUT) {
     // Set keyboard LED e.g Capslock, Numlock etc...
@@ -288,6 +299,84 @@ int16_t mcp3204_read(int channel)
   return adc_value;
 }
 
+void button_setup()
+{
+  gpio_init(BUTTON_Y);
+  gpio_init(BUTTON_X);
+  gpio_init(BUTTON_B);
+  gpio_init(BUTTON_A);
+  gpio_init(BUTTON_D);
+  gpio_init(BUTTON_R);
+  gpio_init(BUTTON_L);
+  gpio_init(BUTTON_U);
+  gpio_init(BUTTON_L1);
+  gpio_init(BUTTON_L2);
+  gpio_init(BUTTON_R1);
+  gpio_init(BUTTON_R2);
+  gpio_init(BUTTON_L3);
+  gpio_init(BUTTON_R3);
+  gpio_init(BUTTON_START);
+  gpio_init(BUTTON_HOME);
+  gpio_init(BUTTON_SELECT);
+
+  gpio_set_dir(BUTTON_Y, GPIO_IN);
+  gpio_set_dir(BUTTON_X, GPIO_IN);
+  gpio_set_dir(BUTTON_B, GPIO_IN);
+  gpio_set_dir(BUTTON_A, GPIO_IN);
+  gpio_set_dir(BUTTON_D, GPIO_IN);
+  gpio_set_dir(BUTTON_R, GPIO_IN);
+  gpio_set_dir(BUTTON_L, GPIO_IN);
+  gpio_set_dir(BUTTON_U, GPIO_IN);
+  gpio_set_dir(BUTTON_L1, GPIO_IN);
+  gpio_set_dir(BUTTON_L2, GPIO_IN);
+  gpio_set_dir(BUTTON_R1, GPIO_IN);
+  gpio_set_dir(BUTTON_R2, GPIO_IN);
+  gpio_set_dir(BUTTON_L3, GPIO_IN);
+  gpio_set_dir(BUTTON_R3, GPIO_IN);
+  gpio_set_dir(BUTTON_START, GPIO_IN);
+  gpio_set_dir(BUTTON_HOME, GPIO_IN);
+  gpio_set_dir(BUTTON_SELECT, GPIO_IN);
+
+  gpio_pull_up(BUTTON_Y);
+  gpio_pull_up(BUTTON_X);
+  gpio_pull_up(BUTTON_B);
+  gpio_pull_up(BUTTON_A);
+  gpio_pull_up(BUTTON_D);
+  gpio_pull_up(BUTTON_R);
+  gpio_pull_up(BUTTON_L);
+  gpio_pull_up(BUTTON_U);
+  gpio_pull_up(BUTTON_L1);
+  gpio_pull_up(BUTTON_L2);
+  gpio_pull_up(BUTTON_R1);
+  gpio_pull_up(BUTTON_R2);
+  gpio_pull_up(BUTTON_L3);
+  gpio_pull_up(BUTTON_R3);
+  gpio_pull_up(BUTTON_START);
+  gpio_pull_up(BUTTON_HOME);
+  gpio_pull_up(BUTTON_SELECT);
+}
+
+void poll_inputs()
+{
+  report.x = 0xfff - mcp3204_read(MCP3204_CH_LX);
+  report.y = 0xfff - mcp3204_read(MCP3204_CH_LY);
+  report.rx = 0xfff - mcp3204_read(MCP3204_CH_RX);
+  report.ry = 0xfff - mcp3204_read(MCP3204_CH_RY);
+
+  report.z = !gpio_get(BUTTON_L2) * 0xFFF;
+  report.rz = !gpio_get(BUTTON_R2) * 0xFFF;
+
+  report.buttons = (GAMEPAD_BUTTON_A & !gpio_get(BUTTON_A)) | (GAMEPAD_BUTTON_B & !gpio_get(BUTTON_B) << 1) | (GAMEPAD_BUTTON_X & !gpio_get(BUTTON_X) << 3) | (GAMEPAD_BUTTON_Y & !gpio_get(BUTTON_Y) << 4);
+
+  report.buttons = report.buttons | (GAMEPAD_BUTTON_TL & !gpio_get(BUTTON_L1) << 6) | (GAMEPAD_BUTTON_TR & !gpio_get(BUTTON_R1) << 7);
+  
+  report.buttons = report.buttons | (GAMEPAD_BUTTON_THUMBL & !gpio_get(BUTTON_L3) << 13) | (GAMEPAD_BUTTON_THUMBR & !gpio_get(BUTTON_R3) << 14);
+
+  report.buttons = report.buttons | (GAMEPAD_BUTTON_START & !gpio_get(BUTTON_START) << 11) | (GAMEPAD_BUTTON_SELECT & !gpio_get(BUTTON_SELECT) << 10) | (GAMEPAD_BUTTON_MODE & !gpio_get(BUTTON_HOME) << 12);
+  
+  report.hat = (GAMEPAD_HAT_UP & !gpio_get(BUTTON_U)) | (GAMEPAD_HAT_RIGHT & (!gpio_get(BUTTON_R) * 0x3)) | (GAMEPAD_HAT_DOWN & (!gpio_get(BUTTON_D) * 0x5)) | ((GAMEPAD_HAT_LEFT & !gpio_get(BUTTON_L) * 0x7));
+}
+
 int main()
 { 
   board_init();
@@ -297,11 +386,14 @@ int main()
   mcp3204_init();
   print_i("mcp3204 Initialized.\n");
 
+  button_setup();
+
   // Initialize the Wi-Fi chip
   if (cyw43_arch_init()) {
       print_i("Wi-Fi init failed\n");
       return -1;
   }
+  
   print_i("CYW43 Initialized.\n");
 
   tud_init(BOARD_TUD_RHPORT);
@@ -311,12 +403,11 @@ int main()
   }
 
   print_i("tud_init\n");
-  
+
   while (true) {
-    report.x = mcp3204_read(MCP3204_CH_LX);
-    report.y = mcp3204_read(MCP3204_CH_LY);
     tud_task();
     led_blinking_task();
+    poll_inputs();
     hid_task();
   }
 }
